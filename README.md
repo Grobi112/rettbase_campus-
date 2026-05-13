@@ -8,9 +8,31 @@ Eigenständige Flutter-App für das Firebase-Projekt **rettbase-campus** (Anzeig
 - [Firebase CLI](https://firebase.google.com/docs/cli) mit Login (`firebase login`)
 - In der **Firebase Console** → Authentication → **E-Mail/Passwort** aktivieren (für Login und „Konto anlegen“ in der Entwicklung)
 
+## Firestore-Datenmodell (kompatibel zur RettBase-Haupt-App)
+
+Ziel ist dieselbe Struktur unter `kunden/{companyDocId}/…`, damit SSD-Code portierbar bleibt:
+
+| Pfad | Zweck |
+|------|--------|
+| `kunden/{id}` | Stammdaten der Schule/Firma |
+| `kunden/{id}/users/{uid}` | Rolle + `companyId` (Zuordnung Firebase-Auth → Kunde); **muss** existieren, damit Regeln Zugriff gewähren |
+| `kunden/{id}/mitarbeiter/{mitarbeiterId}` | Mitarbeiter inkl. ggf. `uid` |
+| `kunden/{id}/modules/{moduleId}` | Modul-Schalter (optional) |
+| `kunden/{id}/ssd_dienstplan_*` | Dienstplan-Labels / Ausnahmen |
+| `kunden/{id}/ssdPublicAlarmOrte/{token}` | Öffentliche Alarm-Orte (Verwaltung) |
+| `kunden/{id}/einsatzprotokoll-ssd/{…}` | Einsatzprotokoll SSD |
+| `kunden/{id}/alarmierung-nfs/{…}` | Alarmierung (wie RettBase) |
+| `kunden/{id}/alarmierung-nfs-zähler/{jahr}` | Laufende Nummern (Umlaut im Collection-Namen) |
+| `kunden/{id}/settings/…` | u. a. `einsatzprotokoll-ssd`, `material_check` (letzteres strenger) |
+| `campus_connect_selftest/{uid}` | Entwickler-Selbsttest |
+
+Weitere Collections für spätere Features **explizit** in `firestore.rules` ergänzen (kein generisches `/{document=**}`, damit Mitarbeiter-Updates nicht aufgeweicht werden).
+
+**Erster Login:** Ohne `kunden/.../users/{uid}` gibt es keinen Firestore-Lesezugriff auf den Kunden. Anlage erfolgt typischerweise per **Cloud Function** (wie `ensureUsersDoc` / Admin) oder manuell in der Console bis Functions stehen.
+
 ## Firestore Security Rules
 
-Die Regeln liegen in `firestore.rules` (Collection `campus_connect_selftest`: nur eigenes Dokument `docId == request.auth.uid`).
+Datei `firestore.rules`: Zugriff auf `kunden/*` nur, wenn `kunden/{id}/users/{auth.uid}` existiert (oder Superadmin-E-Mail wie in RettBase). Explizite Regeln u. a. für `mitarbeiter`, `users`, `modules`, Dienstplan-SSD, `einsatzprotokoll-ssd`, Alarmierung, `settings`, `ssd_share_pins` (nur Server), `fcmTokens`. Collection `alarmierung-nfs-zähler` per Variable + Stringvergleich (Umlaut im Namen).
 
 Deployment aus diesem Ordner (Projekt explizit setzen, falls die CLI sonst ein anderes Repo-Root wählt):
 
