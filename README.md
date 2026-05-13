@@ -47,6 +47,27 @@ Optional dauerhaft für dieses Verzeichnis:
 firebase use rettbase-campus
 ```
 
+## Cloud Functions (eigenes Paket `functions/`)
+
+Callable Functions (Region **europe-west1**):
+
+| Name | Zweck |
+|------|--------|
+| `kundeExists` | Prüft Kunden-ID / Subdomain → `docId` (ohne Auth, mit Rate-Limit) |
+| `ensureUsersDoc` | Legt `kunden/{docId}/users/{uid}` an (nach Login), wenn Mitarbeiter-Eintrag mit `uid` existiert oder technische Superadmin-E-Mail |
+
+**Deploy** (im Ordner `rettbase_campus`):
+
+```bash
+cd rettbase_campus/functions && npm install
+cd ..
+firebase deploy --only functions --project rettbase-campus
+```
+
+**Voraussetzung:** Das Firebase-Projekt muss den **Blaze-Tarif** nutzen (Cloud Functions / Cloud Build). Ohne Blaze schlägt `firebase deploy --only functions` fehl – die Dateien liegen trotzdem im Repo bereit.
+
+Der Quellcode unter `functions/` ist **nur für RettBase Campus** gedacht (keine Abhängigkeit von der Haupt-App `app/functions`).
+
 ## App starten
 
 ```bash

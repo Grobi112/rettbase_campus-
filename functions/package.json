@@ -1,0 +1,16 @@
+{
+  "name": "rettbase-campus-functions",
+  "description": "RettBase Campus – eigenständige Callable Functions (nur rettbase-campus).",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "lint": "eslint . || true"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  }
+}
