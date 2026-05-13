@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "455122263704",
+    "project_id": "rettbase-campus",
+    "storage_bucket": "rettbase-campus.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:455122263704:android:b778989fdc34c96a8b3aed",
+        "android_client_info": {
+          "package_name": "de.rettbase.campus.rettbase_campus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAE_3UD77_bgqRp4RY_oD30Qsae_aliDuA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
