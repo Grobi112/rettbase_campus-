@@ -2,7 +2,7 @@
   "name": "rettbase-campus-functions",
   "description": "RettBase Campus – eigenständige Callable Functions (nur rettbase-campus).",
   "engines": {
-    "node": ">=20"
+    "node": "22"
   },
   "main": "index.js",
   "private": true,

@@ -28,7 +28,7 @@ Ziel ist dieselbe Struktur unter `kunden/{companyDocId}/…`, damit SSD-Code por
 
 Weitere Collections für spätere Features **explizit** in `firestore.rules` ergänzen (kein generisches `/{document=**}`, damit Mitarbeiter-Updates nicht aufgeweicht werden).
 
-**Erster Login:** Ohne `kunden/.../users/{uid}` gibt es keinen Firestore-Lesezugriff auf den Kunden. Anlage erfolgt typischerweise per **Cloud Function** (wie `ensureUsersDoc` / Admin) oder manuell in der Console bis Functions stehen.
+**Erster Login:** Ohne `kunden/.../users/{uid}` gibt es keinen Firestore-Lesezugriff auf den Kunden. Kunden legt die **Admin-UI** per Callable **`createCampusCustomer`** an; danach **`mitarbeiter`** (manuell, später weitere Functions) und **`ensureUsersDoc`** nach dem Login.
 
 ## Firestore Security Rules
 
@@ -55,6 +55,25 @@ Callable Functions (Region **europe-west1**):
 |------|--------|
 | `kundeExists` | Prüft Kunden-ID / Subdomain → `docId` (ohne Auth, mit Rate-Limit) |
 | `ensureUsersDoc` | Legt `kunden/{docId}/users/{uid}` an (nach Login), wenn Mitarbeiter-Eintrag mit `uid` existiert oder technische Superadmin-E-Mail |
+| `createCampusCustomer` | **Admin-UI:** neuen Kunden (`kunden/{doc}`) anlegen – nur technische Admins (siehe unten) |
+| `listCampusCustomers` | **Admin-UI:** Kundenliste (max. 500, sortiert nach Name) – nur technische Admins |
+
+### Wer darf `createCampusCustomer` / `listCampusCustomers`?
+
+- Firebase-Auth mit E-Mail **admin@rettbase.de**, **admin@rettbase** oder **112@admin.rettbase.de**, **oder**
+- Custom Claim **`campusSuperadmin: true`** (wird bei `ensureUsersDoc` für Superadmin-E-Mails mit gesetzt).
+
+### Payload `createCampusCustomer`
+
+| Feld | Pflicht | Beschreibung |
+|------|---------|----------------|
+| `kundenId` | ja | Login-Kennung (normalisiert: klein, nur `a-z`, `0-9`, `-`) |
+| `name` | ja | Anzeigename der Schule |
+| `firestoreDocId` | nein | Dokument-ID unter `kunden/` (Standard = normalisierte `kundenId`) |
+| `subdomain` | nein | Standard = `kundenId` |
+| `address`, `zipCity`, `phone`, `email` | nein | optionale Stammdaten |
+
+Antwort: `{ success: true, docId, kundenId }`. Feld **`bereich`** ist immer **`schulsanitaetsdienst`**. Doppelte `kundenId` oder bestehendes Doc → Fehler `already-exists`.
 
 **Deploy** (im Ordner `rettbase_campus`):
 
@@ -64,7 +83,11 @@ cd ..
 firebase deploy --only functions --project rettbase-campus
 ```
 
-**Voraussetzung:** Das Firebase-Projekt muss den **Blaze-Tarif** nutzen (Cloud Functions / Cloud Build). Ohne Blaze schlägt `firebase deploy --only functions` fehl – die Dateien liegen trotzdem im Repo bereit.
+Falls die CLI nach einer **Artifact-Cleanup-Policy** fragt: einmalig  
+`firebase deploy --only functions --project rettbase-campus --force`  
+ausführen.
+
+**Voraussetzung:** Firebase-Projekt **Blaze** (Cloud Functions / Cloud Build).
 
 Der Quellcode unter `functions/` ist **nur für RettBase Campus** gedacht (keine Abhängigkeit von der Haupt-App `app/functions`).
 
