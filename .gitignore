@@ -1,6 +1,9 @@
 # Node (Cloud Functions)
 functions/node_modules/
 
+# Firebase CLI cache (lokal)
+.firebase/
+
 # Miscellaneous
 *.class
 *.log

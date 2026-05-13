@@ -1,11 +1,11 @@
 {
-    "name": "rettbase_campus",
-    "short_name": "rettbase_campus",
+    "name": "RettBase Campus",
+    "short_name": "Campus",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F8F9FA",
+    "theme_color": "#E63946",
+    "description": "RettBase Campus – Schul-Sanitätsdienst (SSD).",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

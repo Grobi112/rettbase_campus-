@@ -8,20 +8,31 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Technische Campus-Admins: gleiche Logik wie Cloud Functions (isGlobalSuperadminEmail + Claim).
     function isSuperadmin() {
-      let email = request.auth.token.email;
-      return email != null && (
-        email == 'admin@rettbase.de' ||
-        (email.matches('.*@admin.rettbase.de') && email.matches('112@.*'))
-      );
+      return request.auth.token.campusSuperadmin == true
+        || (request.auth.token.email != null && (
+          request.auth.token.email == 'admin@rettbase.de' ||
+          request.auth.token.email == 'admin@rettbase' ||
+          request.auth.token.email == '112@admin.rettbase.de'
+        ));
     }
 
     function belongsToCompany(kundenId) {
       return exists(/databases/$(database)/documents/kunden/$(kundenId)/users/$(request.auth.uid));
     }
 
+    /** Nur bei status == 'inactive' gesperrt; fehlendes Feld = aktiv (wie in Functions). */
+    function customerCompanyIsActive(kundenId) {
+      let kd = get(/databases/$(database)/documents/kunden/$(kundenId));
+      return kd.exists && kd.data.status != 'inactive';
+    }
+
     function canAccessCompany(kundenId) {
-      return isLoggedIn() && (belongsToCompany(kundenId) || isSuperadmin());
+      return isLoggedIn() && (
+        isSuperadmin()
+        || (customerCompanyIsActive(kundenId) && belongsToCompany(kundenId))
+      );
     }
 
     function companyUserExists(kundenId) {
@@ -77,8 +88,9 @@ service cloud.firestore {
     }
 
     function ssdDienstplanKannSchreiben(kundenId) {
-      return exists(/databases/$(database)/documents/kunden/$(kundenId)/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/kunden/$(kundenId)/users/$(request.auth.uid)).data.role in ['admin', 'leiterssd'];
+      return isSuperadmin()
+        || (exists(/databases/$(database)/documents/kunden/$(kundenId)/users/$(request.auth.uid))
+            && get(/databases/$(database)/documents/kunden/$(kundenId)/users/$(request.auth.uid)).data.role in ['admin', 'leiterssd']);
     }
 
     function materialCheckSettingsKannSchreiben(kundenId) {

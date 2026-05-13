@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="rettbase_campus"
+        android:label="RettBase Campus"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

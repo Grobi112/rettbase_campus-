@@ -1,5 +1,12 @@
 {
   "projects": {
     "default": "rettbase-campus"
+  },
+  "targets": {
+    "rettbase-campus": {
+      "hosting": {
+        "campus-admin": ["rettbase-campus-admin"]
+      }
+    }
   }
 }
